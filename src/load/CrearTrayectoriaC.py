@@ -8,7 +8,7 @@ Created on Sat Feb  9 12:45:50 2019
 from modelo.Trayectoria import Trayectoria
 #import geopandas as gpd
 from shapely.geometry import Point
-class CrearTrayectoria():
+class CrearTrayectoriaC():
     def __init__(self,args=()):
         
         self.gdf=args[0]
@@ -24,14 +24,14 @@ class CrearTrayectoria():
         t=0
         #Colas para obtener la media movil
         from collections import deque
-        colaM1=deque()
+
         colaM23=deque()
         #tuplas de la media y para en intercambio de colas
         tp=tuple()
         mediaX=0
         mediaY=0
         #Parado
-        self.gdf['parado']=False
+        self.gdf['parado']=0
         #DIVIDIR En TRAYECTORIAS
         corte=0
         #RETURN
@@ -51,18 +51,16 @@ class CrearTrayectoria():
             #                      MEDIA MOVIL                      #
             #########################################################
             
-            colaM1.appendleft((fila[self.p],fila[self.t]))
-            while len(colaM1)!=0 and (fila[self.t]-colaM1[-1][1]).total_seconds()> 60:
-                tp=colaM1.popleft()
-                if len(colaM23)==0:
-                    mediaX=tp[0].x
-                    mediaY=tp[0].y
-                    colaM23.appendleft(tp)
-                else:
-                    mediaX=mediaX+(tp[0].x/len(colaM23))
-                    mediaY=mediaY+(tp[0].y/len(colaM23))
-                    colaM23.appendleft(tp)
-            while len(colaM23)!=0 and (fila[self.t]-colaM23[-1][1]).total_seconds()> 180:
+            
+            if len(colaM23)==0:
+                mediaX=fila[self.p].x
+                mediaY=fila[self.p].y
+                colaM23.appendleft((fila[self.p],fila[self.t]))
+            else:
+                mediaX=mediaX+(fila[self.p].x/len(colaM23))
+                mediaY=mediaY+(fila[self.p].y/len(colaM23))
+                colaM23.appendleft((fila[self.p],fila[self.t]))
+            while len(colaM23)!=0 and (fila[self.t]-colaM23[-1][1]).total_seconds()> 120:
                 tp=colaM23.popleft()
                 mediaX=mediaX-(tp[0].x/(len(colaM23)+1))
                 mediaY=mediaY-(tp[0].y/(len(colaM23)+1))
@@ -71,8 +69,8 @@ class CrearTrayectoria():
             #                     ¿ESTA PARADO?                     #
             #########################################################
             if conta!=0:
-                if(Point(mediaX,mediaY).distance(fila[self.p])<30 or (self.__velocidadTramo(fila[self.m],fila2[self.m],t)<0.6)):
-                    self.gdf.iat[conta,4]=True
+                if(Point(mediaX,mediaY).distance(fila[self.p])<45 or (self.__velocidadTramo(fila[self.m],fila2[self.m],t)<0.6)):
+                    self.gdf.iat[conta,4]=1
             #########################################################
             #                       Cortar                          #
             #########################################################

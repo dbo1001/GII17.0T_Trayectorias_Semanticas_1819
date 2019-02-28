@@ -12,7 +12,7 @@ from modelo.Trayectoria import Trayectoria
 #from ..trayectoria import Trayectoria
 
 class LoadCSV():
-    def __init__(self,x,y,t,e,crs):
+    def __init__(self,x,y,t,e,crs,saltolinea):
         self.__estension=e
         self.crs=crs
         self.__primeraLinea=0
@@ -20,6 +20,7 @@ class LoadCSV():
         self.y=y
         self.__t=t
         self.t=''
+        self.salto=saltolinea
         
     def __leerArchivo(self,route):
         usar=list()
@@ -33,7 +34,7 @@ class LoadCSV():
         else:
             usar.append(self.__t[0])
             formFecha=self.__t[1]
-        data= pd.read_csv(route, error_bad_lines=False,header=None,skiprows=6,usecols=usar)
+        data= pd.read_csv(route, error_bad_lines=False,header=None,skiprows=self.salto,usecols=usar)
         if type(self.__t)!= tuple:
             data[usar[2]] = data[usar[2]] +' '+ data[usar[3]]
             
