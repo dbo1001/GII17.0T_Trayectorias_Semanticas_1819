@@ -7,9 +7,8 @@ Created on Sat Feb  9 12:45:50 2019
 
 from modelo.Trayectoria import Trayectoria
 import numpy as np
-
 import pandas as pd
-from shapely.geometry import Point
+from .ConfiguracionDeLectura import ConfiguracionDeLectura as CDL
 class CrearTrayectoriaB():
     def __init__(self,args=()):
         
@@ -19,71 +18,50 @@ class CrearTrayectoriaB():
         self.p=args[3]
         self.m=args[4]
         self.v=args[5]
-        self.D0=43
+        self.D0=35
         self.D1=45
         self.T0=60
+        self.CDL=CDL()
               
     def run(self):
         r=list()
         corte=0
-        self.gdf['velocidad']=self.gdf.metros.apply(lambda x: x.y)
-        self.gdf['mY']=self.gdf.metros.apply(lambda x: x.y)
-        self.gdf['mX']=self.gdf.metros.apply(lambda x: x.x)
-        self.gdf['metros']=self.gdf.metros.apply(lambda x: x.x)
-        self.gdf['metros']=self.gdf.metros.rolling(2).apply(self.__dis,raw=True)
-        self.gdf['velocidad']=self.gdf.velocidad.rolling(2).apply(self.__dis,raw=True)
-        self.gdf['metros']=self.gdf.apply(lambda x: (np.sqrt(x['velocidad']**2+x['metros']**2)),axis=1)
-        self.gdf['velocidad']=pd.to_timedelta(self.gdf['time']).dt.total_seconds()
-        self.gdf['intervalo']=self.gdf.velocidad.rolling(2).apply(lambda x: (x[1]-x[0]),raw=True)
-        self.gdf['velocidad']=self.gdf.apply(lambda x: (x['metros']/x['intervalo']),axis=1)
-        #valore para parado 0 movimiento, 1 parado, 2 no se sabe
-        self.gdf['parado']=2
-        self.gdf=self.gdf.reset_index()
-        
+        self.gdf["estado"]=2
+        print(list(self.gdf.columns))
+        self.CalcularDatos(self.gdf,self.CDL.crs)
+        print(list(self.gdf.columns))
         #########################################
-        #                PARADO                 #
+        #                Dividir                #
         #########################################
-        ruta=list()
-        ruta.append(0)
-        for i in range(1,len(self.gdf)):
-            corta=self.__disParada(i,ruta)
-            if corta:
-                ruta=list()
-            ruta.append(i)
-                
-        
+                        
         
         for i in range(1,len(self.gdf)):
             if self.gdf.iat[i,7]>180 and (self.gdf.iat[i,3]>110):
-                if i-corte>5 and self.gdf.iat[i,7]> 300:
-                    r.append(Trayectoria(0,0,self.gdf.iloc[corte:i]))
+                if i-corte>15 and abs(self.gdf.iloc[corte:i].intervalo.sum())> 300:
+                    r.append(Trayectoria(0,0,self.gdf.iloc[corte:i].copy()))
                 corte=i
-
+        
         return r
+    def CalcularDatos(self, gdf,crs):
+        df1=gdf['punto'].copy()
+        df1.crs={'init': crs, 'no_defs': True}
+        df1=df1.to_crs(epsg=3395)
+        gdf['metros']=df1
+        gdf['velocidad']=0.0
+        gdf['velocidad']=gdf.metros.apply(lambda x: x.y)
+        gdf['mY']=gdf.metros.apply(lambda x: x.y)
+        gdf['mX']=gdf.metros.apply(lambda x: x.x)
+        gdf['metros']=gdf.metros.apply(lambda x: x.x)
+        gdf['metros']=gdf.metros.rolling(2).apply(self.__dis,raw=True)
+        gdf['velocidad']=gdf.velocidad.rolling(2).apply(self.__dis,raw=True)
+        gdf['metros']=gdf.apply(lambda x: (np.sqrt(x['velocidad']**2+x['metros']**2)),axis=1)
+        gdf['velocidad']=pd.to_timedelta(gdf['time']).dt.total_seconds()
+        gdf['intervalo']=gdf.velocidad.rolling(2).apply(lambda x: abs(x[1]-x[0]),raw=True)
+        gdf['velocidad']=gdf.apply(lambda x: (x['metros']/x['intervalo']),axis=1)
+        #valore para parado 0 movimiento, 1 parado, 2 no se sabe
+        gdf=gdf.reset_index(drop=True)
+        return gdf
     def __dis(self,x):
         return abs(x[0]-x[1])
-    def __disParada(self,i,ruta):
-        if self.gdf.loc[ruta[0]:i,'intervalo'].sum()>self.T0:
-            for j in ruta:
-                c1=self.__dis([self.gdf['mX'].iloc[i],self.gdf['mX'].iloc[j]])
-                c2=self.__dis([self.gdf['mY'].iloc[i],self.gdf['mY'].iloc[j]])
-                if np.sqrt(c2**2+c1**2)<self.D0:
-                    self.gdf.loc[ruta[0]:i,'parado']=1
-                elif np.sqrt(c2**2+c1**2)>self.D1:
-                    self.gdf.loc[ruta[0]:i,'parado']=0
-                return True
-        return False
-#    def __disParada(self,i,ruta):
-#        
-#        for j in ruta:
-#            c1=self.__dis([self.gdf['mX'].iloc[i],self.gdf['mX'].iloc[j]])
-#            c2=self.__dis([self.gdf['mY'].iloc[i],self.gdf['mY'].iloc[j]])
-#            if not( np.sqrt(c2**2+c1**2)<self.D0):
-#                if  np.sqrt(c2**2+c1**2)>self.D1:
-#                    self.gdf.loc[ruta[0]:i,'parado']=0
-#                else:
-#                    if self.gdf.loc[ruta[0]:i,'intervalo'].sum()>self.T0:
-#                        self.gdf.loc[ruta[0]:i,'parado']=1
-#                return True
-#        return False
+
             
