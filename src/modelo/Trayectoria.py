@@ -15,7 +15,7 @@ class Trayectoria():
         self.T0=60
         self.D0=40
         self.D1=45
-        self.crs=gdf.crs
+        self.crs=gdf.punto.crs
         #Cargar de una base de datos
         if len(list(gdf.columns))==3:
             gdf=CrearTrayectoriaB().CalcularDatos( gdf,self.crs)
@@ -28,7 +28,7 @@ class Trayectoria():
     def getNumElementos(self):
         """
         >>> from shapely.geometry import Point
-        >>> d = {'time': [1, 2,4],'punto':[Point(1,5),Point(3,3),Point(2,1)],'metros':[30,65,76],'velocidad':[1.3,2.0,7.4], 'estado': [True, True, False]}
+        >>> d = {'instante': [1, 2,4],'punto':[Point(1,5),Point(3,3),Point(2,1)],'metros':[30,65,76],'velocidad':[1.3,2.0,7.4], 'estado': [True, True, False]}
         >>> df = gpd.GeoDataFrame(data=d)        
         >>> t=Trayectoria(1,1,df)        
         >>> t.getNumElementos()
@@ -39,7 +39,7 @@ class Trayectoria():
     def getIdUsuario(self):
         """
         >>> from shapely.geometry import Point
-        >>> d = {'time': [1, 2,4],'punto':[Point(1,5),Point(3,3),Point(2,1)],'metros':[30,65,76],'velocidad':[1.3,2.0,7.4], 'estado': [True, True, False]}
+        >>> d = {'instante': [1, 2,4],'punto':[Point(1,5),Point(3,3),Point(2,1)],'metros':[30,65,76],'velocidad':[1.3,2.0,7.4], 'estado': [True, True, False]}
         >>> df = gpd.GeoDataFrame(data=d)        
         >>> t=Trayectoria(1,1,df) 
         >>> t.getIdUsuario()
@@ -50,7 +50,7 @@ class Trayectoria():
     def getIdRuta(self):
         """
         >>> from shapely.geometry import Point
-        >>> d = {'time': [1, 2,4],'punto':[Point(1,5),Point(3,3),Point(2,1)],'metros':[30,65,76],'velocidad':[1.3,2.0,7.4], 'estado': [True, True, False]}
+        >>> d = {'instante': [1, 2,4],'punto':[Point(1,5),Point(3,3),Point(2,1)],'metros':[30,65,76],'velocidad':[1.3,2.0,7.4], 'estado': [True, True, False]}
         >>> df = gpd.GeoDataFrame(data=d)        
         >>> t=Trayectoria(1,1,df) 
         >>> t.getIdRuta()
@@ -61,7 +61,7 @@ class Trayectoria():
     def numParados(self):
         """
         >>> from shapely.geometry import Point
-        >>> d = {'time': [1, 2,4],'punto':[Point(1,5),Point(3,3),Point(2,1)],'metros':[30,65,76],'velocidad':[1.3,2.0,7.4], 'estado': [True, True, False]}
+        >>> d = {'instante': [1, 2,4],'punto':[Point(1,5),Point(3,3),Point(2,1)],'metros':[30,65,76],'velocidad':[1.3,2.0,7.4], 'estado': [True, True, False]}
         >>> df = gpd.GeoDataFrame(data=d)        
         >>> t=Trayectoria(1,1,df) 
         >>> t.numestados()
@@ -83,7 +83,7 @@ class Trayectoria():
     def plotTrayectoria(self):
         """
         >>> from shapely.geometry import Point
-        >>> d = {'time': [1, 2,4],'punto':[Point(1,5),Point(3,3),Point(2,1)],'metros':[30,65,76],'velocidad':[1.3,2.0,7.4], 'estado': [True, True, False]}
+        >>> d = {'instante': [1, 2,4],'punto':[Point(1,5),Point(3,3),Point(2,1)],'metros':[30,65,76],'velocidad':[1.3,2.0,7.4], 'estado': [True, True, False]}
         >>> df = gpd.GeoDataFrame(data=d)        
         >>> t=Trayectoria(1,1,df) 
         >>> t.plotTrayectoria()
@@ -98,18 +98,19 @@ class Trayectoria():
         ruta=list()
         ruta.append(0)
         for i in range(1,len(gdf)):
-            if gdf.loc[ruta[0]:i,'intervalo'].sum()>self.T0:
+            if len(ruta)>1 and gdf.loc[ruta[1]:i,'intervalo'].sum()>self.T0:
                 for j in ruta:
                     c1=self.__dis([gdf['mX'].iloc[i],gdf['mX'].iloc[j]])
                     c2=self.__dis([gdf['mY'].iloc[i],gdf['mY'].iloc[j]])
                     if np.sqrt(c2**2+c1**2)<self.D0:
                         if j==ruta[len(ruta)-1]:
-                            gdf.loc[ruta[0]:i,'estado']=1
+                            gdf.loc[ruta[0]:i+1,'estado']=1
                             ruta=list()
                             break
                     elif np.sqrt(c2**2+c1**2)>self.D1:
-                        gdf.loc[ruta[0]:i,'estado']=0
+                        gdf.loc[ruta[1]:i,'estado']=0
                         ruta=list()
+                        
                         break
             ruta.append(i)
                 
@@ -118,6 +119,8 @@ class Trayectoria():
         return abs(x[0]-x[1])
     def getGDF(self):
         return self.GeoDataFrame
+    def getCrs(self):
+        return self.crs
     def velocidadMediaParado(self):
         return self.GeoDataFrame.velocidad[self.GeoDataFrame['estado'] == 1].mean()
     def velocidadMediaMovimiento(self):

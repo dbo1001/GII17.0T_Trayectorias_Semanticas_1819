@@ -4,14 +4,15 @@ Created on Sun Mar 10 17:31:39 2019
 
 @author: Hector
 """
-import math
+#import math
 from shapely.geometry import  Point
 #from shapely.geometry import LineString
 import geopandas as gpd
 class TrayectoriaConceptual():
     def __init__(self,trayectoria):
-        self.gdf=gpd.GeoDataFrame(columns=['geometry','instante_inicio','instante_fin'])
+        self.gdf=gpd.GeoDataFrame(columns=['punto','instante_inicio','instante_fin'],geometry="punto")
         self.__CombertirAConceptual(trayectoria)
+        self.__idTrayectoria=trayectoria.getIdRuta()
         pass
 #    def __CombertirAConceptual(self,trayectoria):
 #        gdf=trayectoria.GeoDataFrame
@@ -98,9 +99,13 @@ class TrayectoriaConceptual():
            x=x+gdf.punto[i].x
            y=y+gdf.punto[i].y
         p=Point(x/len(lista),y/len(lista))
-        self.gdf.loc[len(self.gdf)]=[ p,gdf.time[0],gdf.time[len(lista)]]
+        self.gdf.loc[len(self.gdf)]=[ p,gdf.instante[lista[0]],gdf.instante[lista[len(lista)-1]]]
+        print(len(lista))
         pass
-    
+    def getIdTrayectoria(self):
+        return self.__idTrayectoria
+    def getGDF(self):
+        return self.gdf
 if __name__ == "__main__":
     import doctest
     doctest.testmod(verbose=False)

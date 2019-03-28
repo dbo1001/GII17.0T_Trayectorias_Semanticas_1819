@@ -9,6 +9,7 @@ from modelo.Trayectoria import Trayectoria
 import numpy as np
 import pandas as pd
 from .ConfiguracionDeLectura import ConfiguracionDeLectura as CDL
+from .Contadores import idTrayectoria
 class CrearTrayectoriaB():
     def __init__(self,args=()):
         
@@ -27,18 +28,16 @@ class CrearTrayectoriaB():
         r=list()
         corte=0
         self.gdf["estado"]=2
-        print(list(self.gdf.columns))
-        self.CalcularDatos(self.gdf,self.CDL.crs)
-        print(list(self.gdf.columns))
+        self.gdf=self.CalcularDatos(self.gdf,self.CDL.crs)
+        contaTra=idTrayectoria()
         #########################################
         #                Dividir                #
         #########################################
-                        
-        
+    
         for i in range(1,len(self.gdf)):
             if self.gdf.iat[i,7]>180 and (self.gdf.iat[i,3]>110):
                 if i-corte>15 and abs(self.gdf.iloc[corte:i].intervalo.sum())> 300:
-                    r.append(Trayectoria(0,0,self.gdf.iloc[corte:i].copy()))
+                    r.append(Trayectoria(contaTra.cId(),self.idUsu,self.gdf.iloc[corte:i].copy()))
                 corte=i
         
         return r
@@ -55,11 +54,13 @@ class CrearTrayectoriaB():
         gdf['metros']=gdf.metros.rolling(2).apply(self.__dis,raw=True)
         gdf['velocidad']=gdf.velocidad.rolling(2).apply(self.__dis,raw=True)
         gdf['metros']=gdf.apply(lambda x: (np.sqrt(x['velocidad']**2+x['metros']**2)),axis=1)
-        gdf['velocidad']=pd.to_timedelta(gdf['time']).dt.total_seconds()
+        gdf['velocidad']=pd.to_timedelta(gdf['instante']).dt.total_seconds()
         gdf['intervalo']=gdf.velocidad.rolling(2).apply(lambda x: abs(x[1]-x[0]),raw=True)
         gdf['velocidad']=gdf.apply(lambda x: (x['metros']/x['intervalo']),axis=1)
+        gdf.crs={'init': crs, 'no_defs': True}
         #valore para parado 0 movimiento, 1 parado, 2 no se sabe
         gdf=gdf.reset_index(drop=True)
+
         return gdf
     def __dis(self,x):
         return abs(x[0]-x[1])

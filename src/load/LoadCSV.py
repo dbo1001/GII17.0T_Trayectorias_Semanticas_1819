@@ -30,8 +30,8 @@ class LoadCSV():
                 data[usar[2]] = data[usar[2]] + data[usar[i+2]]
                 data=data.drop(usar[i+2],1)
         data[usar[2]]=pd.to_datetime(data[usar[2]],format=formFecha)
-        data=data.rename(columns={usar[2]: 'time'})
-        self.t='time'
+        data=data.rename(columns={usar[2]: 'instante'})
+        self.t='instante'
         return data
     
     def rutasPorUsuario(self,ruta):
