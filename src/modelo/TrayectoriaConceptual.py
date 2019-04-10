@@ -10,9 +10,15 @@ from shapely.geometry import  Point
 import geopandas as gpd
 class TrayectoriaConceptual():
     def __init__(self,trayectoria):
-        self.gdf=gpd.GeoDataFrame(columns=['punto','instante_inicio','instante_fin'],geometry="punto")
-        self.__CombertirAConceptual(trayectoria)
-        self.__idTrayectoria=trayectoria.getIdRuta()
+        if isinstance(trayectoria,gpd.GeoDataFrame):
+            self.gdf=trayectoria[['punto',"instante_inicio","instante_fin"]]
+            self.__idTrayectoria=trayectoria.id_trayectoria.iloc[0]
+            self.__idUsuario=trayectoria.id_usuario.iloc[0]
+        else:
+            self.gdf=gpd.GeoDataFrame(columns=['punto','instante_inicio','instante_fin'],geometry="punto")
+            self.__CombertirAConceptual(trayectoria)
+            self.__idTrayectoria=trayectoria.getIdRuta()
+            self.__idUsuario=trayectoria.getIdUsuario()
         pass
 #    def __CombertirAConceptual(self,trayectoria):
 #        gdf=trayectoria.GeoDataFrame
@@ -48,8 +54,8 @@ class TrayectoriaConceptual():
         if len(parado)>0:
             self.crearParada(parado,gdf)
             parado=list()
-        plt=gdf.plot(figsize=(20, 15), color='blue', markersize=5)        
-        plt=self.gdf.plot(figsize=(20, 15),ax=plt, color='red', markersize=50)
+#        plt=gdf.plot(figsize=(20, 15), color='blue', markersize=5)        
+#        plt=self.gdf.plot(figsize=(20, 15),ax=plt, color='red', markersize=50)
         
         pass
 #    def pendiente(self,x1,x2,y1,y2):
@@ -100,7 +106,6 @@ class TrayectoriaConceptual():
            y=y+gdf.punto[i].y
         p=Point(x/len(lista),y/len(lista))
         self.gdf.loc[len(self.gdf)]=[ p,gdf.instante[lista[0]],gdf.instante[lista[len(lista)-1]]]
-        print(len(lista))
         pass
     def getIdTrayectoria(self):
         return self.__idTrayectoria

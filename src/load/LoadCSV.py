@@ -26,7 +26,7 @@ class LoadCSV():
             formFecha=formFecha+self.CDL.ts[i]
         data= pd.read_csv(route, error_bad_lines=False,header=None,skiprows=self.CDL.lineaIni,usecols=usar)
         if len(self.CDL.t)>1:
-            for i,j in range(1,len(self.CDL.t)):
+            for i in range(1,len(self.CDL.t)):
                 data[usar[2]] = data[usar[2]] + data[usar[i+2]]
                 data=data.drop(usar[i+2],1)
         data[usar[2]]=pd.to_datetime(data[usar[2]],format=formFecha)

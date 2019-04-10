@@ -8,49 +8,52 @@ Created on Wed Jan 30 18:54:01 2019
 from load.LoadCSV import LoadCSV 
 from time import time
 from load.CrearTrayectoriaB import CrearTrayectoriaB
-from modelo.Estadisticas import Estadisticas
 from load.ConfiguracionDeLectura import ConfiguracionDeLectura as CDL
 from modelo.TrayectoriaConceptual import TrayectoriaConceptual
 from load.Contadores import idUsuario
 from SQL import SQLInsert as si
-contaUsu=idUsuario()
+from SQL import SQLSelect as ss
+
 start=time()
-direccion="E:/TFG/Data GPX"#"E:/TFG/Data Reducido"
-exten='.csv'#'.plt'
-x=1 #Longitud
-y=0 #Latitud
-estadisticas=Estadisticas()
-r=list()
-cdl=CDL(x=3,y=2,t=[1],ts=["%Y-%m-%dT%H:%M:%SZ"],extension=".csv",lineaIni=1)
-usuarios=list()
-conceptuales=list()
-conta=0
+def cargarDeSQLConceptuales():
+    l=ss.cargarTrayectoriasConceptuales()
+    print(len(l))
+    pass
+def cargarDeSQLBrutas():
+    l=ss.cargarTrayectoriasBrutas(Where="where public.trayectoria.id_usuario=1")
+    print(len(l))
+def cargarDatosCSV2SQL():
+    contaUsu=idUsuario()
+    direccion="E:/TFG/Data"#"E:/TFG/Data GPX"
+    exten='.plt'#'.csv'
+    x=1 #Longitud
+    y=0 #Latitud
 
-#lectorCSV=LoadCSV(x,y,[(5,"%Y-%m-%d"),(6,"%H:%M:%S")],exten,'epsg:4326',6)
-lectorCSV=LoadCSV(cdl)
-for i in lectorCSV.rutasPorUsuario(direccion):
-    usuario=contaUsu.cId()
-    usuarios.append(usuario)
-    procesar=CrearTrayectoriaB(args=[i,usuario,0,1,2,3])
-    r.extend(procesar.run())
-
-    conta+=1
-    if conta==1:
-        break
-print('Porcentajede paradas: '+str(estadisticas.porcentajeDeParadas(r))+'%')
-
-for i in range(len(r)):
-    print('=============================================================================')
-    print('Rura:',r[i].getIdRuta(),"Usuario:",r[i].getIdUsuario())
-#    r[i].plotTrayectoria()
-    conceptuales.append(TrayectoriaConceptual(r[i]))
-    print('Velocidad media parado:',r[i].velocidadMediaParado(),'m/s')
-    print('Velocidad media en movimiento:',r[i].velocidadMediaMovimiento(),'m/s')
-    print('Velocidad media puntos sin definir:',r[i].velocidadMediaSinDefinir(),'m/s')
-    print('=============================================================================')
-print(len(r))
+    r=list()
+    #cdl=CDL(x=3,y=2,t=[1],ts=["%Y-%m-%dT%H:%M:%SZ"],extension=".csv",lineaIni=1)
+    cdl=CDL(x=x,y=y,t=[5,6],ts=["%Y-%m-%d","%H:%M:%S"],extension=exten,lineaIni=6)
+    usuarios=list()
+    conceptuales=list()
+    conta=0
+    
+    #lectorCSV=LoadCSV(x,y,[(5,"%Y-%m-%d"),(6,"%H:%M:%S")],exten,'epsg:4326',6)
+    lectorCSV=LoadCSV(cdl)
+    for i in lectorCSV.rutasPorUsuario(direccion):
+        usuario=contaUsu.cId()
+        usuarios.append(usuario)
+        procesar=CrearTrayectoriaB(args=[i,usuario,0,1,2,3])
+        r.extend(procesar.run())
+        for j in range(len(r)):
+            conceptuales.append(TrayectoriaConceptual(r[j]))
+        si.insertUsuarios(usuarios)
+        si.insertTrayectoria(r)
+        si.insertarTrayectoriaConceptual(conceptuales)
+        print(conta)
+        r=list()
+        conceptuales=list()
+        usuarios=list()
+        conta+=1
+#cargarDeSQLConceptuales()
+cargarDeSQLBrutas()
 start=time()-start
 print(start)
-print(si.insertUsuarios(usuarios))
-print(si.insertTrayectoria(r))
-print(si.insertarTrayectoriaConceptual(conceptuales))

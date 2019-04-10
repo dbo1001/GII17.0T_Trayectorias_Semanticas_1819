@@ -6,8 +6,8 @@ Created on Wed Mar 27 18:57:38 2019
 """
 
 def conexionBDApp():
-    from sqlalchemy import create_engine,MetaData,func
-    from sqlalchemy.orm import sessionmaker
+    from sqlalchemy import create_engine
+
     
     usuario = "postgres"
     contrasena="123456"

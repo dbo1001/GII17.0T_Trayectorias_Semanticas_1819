@@ -56,6 +56,7 @@ class CrearTrayectoriaB():
         gdf['metros']=gdf.apply(lambda x: (np.sqrt(x['velocidad']**2+x['metros']**2)),axis=1)
         gdf['velocidad']=pd.to_timedelta(gdf['instante']).dt.total_seconds()
         gdf['intervalo']=gdf.velocidad.rolling(2).apply(lambda x: abs(x[1]-x[0]),raw=True)
+        gdf['intervalo']=gdf.intervalo.map(self.__siCero)
         gdf['velocidad']=gdf.apply(lambda x: (x['metros']/x['intervalo']),axis=1)
         gdf.crs={'init': crs, 'no_defs': True}
         #valore para parado 0 movimiento, 1 parado, 2 no se sabe
@@ -64,5 +65,9 @@ class CrearTrayectoriaB():
         return gdf
     def __dis(self,x):
         return abs(x[0]-x[1])
-
+    def __siCero(self,x):
+        if x==0:
+            return 1
+        else:
+            return x
             
