@@ -82,7 +82,8 @@ def probarClasificador(u=1):
 #                    if json['features'][0]['properties']['type']=='yes':
 #                        l3.append(json['features'][0]['properties']['name'])
 #                    else:
-                    l3.append(json['features'][0]['properties']['type'])
+                    if json['features'][0]['properties']['type']!=l3[-1]:
+                        l3.append(json['features'][0]['properties']['type'])
                     
             if len(l3)>2:
                 l4.append(l3)
@@ -112,7 +113,9 @@ def probarTrayectoriaSemantica(u=1):
         ls.append(TrayectoriasSemantica(i))
     return ls
 from prediccion import Probador as pro
-pro.Probador(usuario=153)
+pro.Probador(usuario=153,clasificacion='category')
+pro.Probador(usuario=3,clasificacion='category')
+pro.Probador(usuario=4,clasificacion='category')
 #aciertos=0
 #fallos=0
 #

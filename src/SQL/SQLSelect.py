@@ -61,27 +61,19 @@ def cargarTrayectoriasConceptuales(From="From public.parado",Where=""):
 #        return -1
     return listaTC
 def selectApp(sql):
-    primera=True
-    columns=list()
-    df=None
     engine=cx.conexionBDApp()
     Session = sessionmaker(bind=engine)
     session = Session()
-    resul=engine.execute(sql)
-    
-    for row in resul:
-        if primera:
-            for i in range(len(row)):
-                columns.append(i)
-            df=pd.DataFrame(columns=columns)
-            primera=False
-        columns=list()
-        for i in row:
-            columns.append(i)
-        df.iloc[len(df)]=columns
+    df = pd.read_sql_query(sql, engine)
     session.close()
-    print(df)
-
+    return df
+def selectOSM(sql):
+    engine=cx.conexionBDOSM()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    df = pd.read_sql_query(sql, engine)
+    session.close()
+    return df
 if __name__ == "__main__":
     import SQLConexion as cx
     import doctest

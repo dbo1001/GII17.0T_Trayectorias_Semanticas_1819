@@ -70,7 +70,7 @@ class ClasificadorPrediccion(BaseEstimator,ClassifierMixin):
             df.loc[i]=[j[1],j[0]/len(X),len(j[1])]
         df=df.sort_values("tam",ascending=True)
         df.drop("tam",axis=1,inplace=True)
-        #df=df[df["support"] >= 0.5]
+        df=df[df["support"] >= 0.05]
         df=df.reset_index(drop=True)
         
         
@@ -115,7 +115,7 @@ class ClasificadorPrediccion(BaseEstimator,ClassifierMixin):
                     for i in root.getChildrenList():
                         candidate.loc[len(candidate)]=[i.getSemantic(),candidateScore+i.getSupport()]
             if len(candidate)>0:
-                ret=3
+                ret=1
                 if len(candidate)<2:
                     ret=len(candidate)
                 candidate=candidate.groupby(["ruta"],as_index=False).sum()

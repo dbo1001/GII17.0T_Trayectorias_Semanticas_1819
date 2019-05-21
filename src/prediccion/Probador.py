@@ -13,8 +13,11 @@ class Probador():
     def __init__(self,usuario=35,clasificacion='type'):
         self.__usuario=usuario
         self.__X=self.__cargarUsuario()
+        self.__tam=len(self.__X)
         if clasificacion=='type':
             self.__combertirATipos()
+        elif clasificacion=='category':
+            self.__combertirACategorias()
         self.estadoDeDatos()
         self.validacionCruzada()
         pass
@@ -22,6 +25,8 @@ class Probador():
         gruposX=list()
         resulY=list()
         clasificadores=list()
+        aciertos=0
+        fallos=0
         for i in range(division):
             gruposX.append(list())
             resulY.append(list())
@@ -33,15 +38,20 @@ class Probador():
         rutaY=gruposX.copy()
         for c,i in enumerate(rutaY):
             for j in i:
-                print(j)
                 resulY[c].append(j.pop(-1))
         for i in range(division):
             for j in range(division):
                 if i!=j:
                     clasificadores[i].fit(gruposX[j])
-            self.resultadosTop3(clasificadores[i],rutaY[i],resulY[i])
+            a,f=self.resultados(clasificadores[i],rutaY[i],resulY[i])
+            aciertos=aciertos+a
+            fallos=fallos+f
+        precision=aciertos/(aciertos+fallos)
+        recall=(aciertos+fallos)/(self.__tam)
+        fmeasure=(2*precision*recall)/(precision+recall)
+        print("F-Measure:",fmeasure,"Precision:",precision,"Recall:",recall)
         pass
-    def resultadosTop3(self,clasi,ruta,resul):
+    def resultados(self,clasi,ruta,resul):
         aciertos=0
         fallos=0
         for j,i in enumerate(ruta):
@@ -51,7 +61,7 @@ class Probador():
             else:
                 fallos=fallos+1
         print("Aciertos:",aciertos,"Fallos:",fallos)
-        pass
+        return aciertos,fallos
     def resutadoUnico():
         pass
     def estadisticas():
@@ -95,6 +105,17 @@ class Probador():
         desviacion=0
         for i in l:
             desviacion=desviacion+(i-media)**2
-        desviacion=desviacion/(len(l)-1)
+        desviacion=(desviacion/(len(l)-1))**(1/2)
         varianza=desviacion**2
         print("Clases: ",len(variabilidad),"Elementos: ",contaPuntos,'Desviacion: ',desviacion,'Varianza: ',varianza)
+        
+    def __combertirACategorias(self):
+        l=list()
+        for i in self.__X:
+            l.append(list())
+            for j in i:
+                json=pet.getNominatimforId(j)
+                if json!=-1:
+                    l[len(l)-1].append(json['features'][0]['properties']['category'])
+                
+        self.__X=l
