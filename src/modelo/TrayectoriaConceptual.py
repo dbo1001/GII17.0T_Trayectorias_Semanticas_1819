@@ -6,16 +6,17 @@ Created on Sun Mar 10 17:31:39 2019
 """
 #import math
 from shapely.geometry import  Point
+from nominatim import peticion as pet
 #from shapely.geometry import LineString
 import geopandas as gpd
 class TrayectoriaConceptual():
     def __init__(self,trayectoria):
         if isinstance(trayectoria,gpd.GeoDataFrame):
-            self.gdf=trayectoria[['punto',"instante_inicio","instante_fin"]]
+            self.gdf=trayectoria[['punto',"instante_inicio","instante_fin",'id_osm']]
             self.__idTrayectoria=trayectoria.id_trayectoria.iloc[0]
             self.__idUsuario=trayectoria.id_usuario.iloc[0]
         else:
-            self.gdf=gpd.GeoDataFrame(columns=['punto','instante_inicio','instante_fin'],geometry="punto")
+            self.gdf=gpd.GeoDataFrame(columns=['punto','instante_inicio','instante_fin','id_osm'],geometry="punto")
             self.__CombertirAConceptual(trayectoria)
             self.__idTrayectoria=trayectoria.getIdRuta()
             self.__idUsuario=trayectoria.getIdUsuario()
@@ -97,7 +98,8 @@ class TrayectoriaConceptual():
 #        if len(gdf)>lista[len(lista)-1]:
 #            self.gdf.loc[len(self.gdf)]=[LineString([pIni,gdf.punto[lista[len(lista)-1]+1]]),tIni,gdf.time[lista[len(lista)-1]+1]]   
 #        pass
-
+    def getIdUsuario(self):
+        return self.__idUsuario
     def crearParada(self,lista,gdf):
         x=0
         y=0
@@ -105,7 +107,7 @@ class TrayectoriaConceptual():
            x=x+gdf.punto[i].x
            y=y+gdf.punto[i].y
         p=Point(x/len(lista),y/len(lista))
-        self.gdf.loc[len(self.gdf)]=[ p,gdf.instante[lista[0]],gdf.instante[lista[len(lista)-1]]]
+        self.gdf.loc[len(self.gdf)]=[ p,gdf.instante[lista[0]],gdf.instante[lista[len(lista)-1]],pet.getNominatimIdOSM(y/len(lista),x/len(lista))]
         pass
     def getIdTrayectoria(self):
         return self.__idTrayectoria

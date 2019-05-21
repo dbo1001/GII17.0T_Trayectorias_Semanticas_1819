@@ -11,13 +11,7 @@ import modelo.TrayectoriaConceptual as tc
 import modelo.Trayectoria as tr
 import geopandas as gpd
 import pandas as pd
-"""
-NO ESTA DEFINIDO
-"""
 
-"""
-NO ESTA DEFINIDO
-"""
 def cargarTrayectoriasBrutas(From="From public.punto",Where=""):
     listaTB=list()
     sql="SELECT public.punto.punto, public.punto.instante, public.punto.estado, public.punto.id_trayectoria, public.trayectoria.id_usuario "+From+" INNER JOIN public.trayectoria ON public.punto.id_trayectoria = public.trayectoria.id_trayectoria "+Where+" order by public.punto.id_trayectoria, public.punto.id_punto;"
@@ -47,7 +41,7 @@ def cargarTrayectoriasConceptuales(From="From public.parado",Where=""):
     """
     
     listaTC=list()
-    sql="SELECT public.parado.punto, public.parado.instante_inicio, public.parado.instante_fin, public.parado.id_parada, public.parado.id_trayectoria, public.trayectoria.id_usuario "+From+" INNER JOIN public.trayectoria ON public.parado.id_trayectoria = public.trayectoria.id_trayectoria "+Where+" order by public.parado.id_trayectoria, public.parado.id_parada;"
+    sql="SELECT public.parado.punto, public.parado.instante_inicio, public.parado.instante_fin, public.parado.id_parada, public.parado.id_trayectoria, public.trayectoria.id_usuario, public.parado.id_osm "+From+" INNER JOIN public.trayectoria ON public.parado.id_trayectoria = public.trayectoria.id_trayectoria "+Where+" order by public.parado.id_trayectoria, public.parado.id_parada;"
 
     if True:
         engine=cx.conexionBDApp()
@@ -57,16 +51,36 @@ def cargarTrayectoriasConceptuales(From="From public.parado",Where=""):
         session.close()
         maxi=datos.id_trayectoria.max()
         while True:
-            a=tc.TrayectoriaConceptual(datos[datos.id_trayectoria==datos.id_trayectoria.iloc[0]])
-            listaTC.append(a)
-            if datos.iat[0,4]==maxi:
-                break
-            datos=datos[datos.id_trayectoria!=datos.id_trayectoria.iloc[0]]
+            if len(datos)>0:
+                a=tc.TrayectoriaConceptual(datos[datos.id_trayectoria==datos.id_trayectoria.iloc[0]])
+                listaTC.append(a)
+                if datos.iat[0,4]==maxi:
+                    break
+                datos=datos[datos.id_trayectoria!=datos.id_trayectoria.iloc[0]]
 #    except:
 #        return -1
     return listaTC
-
-
+def selectApp(sql):
+    primera=True
+    columns=list()
+    df=None
+    engine=cx.conexionBDApp()
+    Session = sessionmaker(bind=engine)
+    session = Session()
+    resul=engine.execute(sql)
+    
+    for row in resul:
+        if primera:
+            for i in range(len(row)):
+                columns.append(i)
+            df=pd.DataFrame(columns=columns)
+            primera=False
+        columns=list()
+        for i in row:
+            columns.append(i)
+        df.iloc[len(df)]=columns
+    session.close()
+    print(df)
 
 if __name__ == "__main__":
     import SQLConexion as cx
