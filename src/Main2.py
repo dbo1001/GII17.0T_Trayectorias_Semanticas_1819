@@ -64,58 +64,22 @@ def guardarIdOSM():
         for j in range(len(i.getGDF())):
             l3.append([j,i.getIdTrayectoria(),pet.getNominatimIdOSM(i.getGDF()["punto"].iloc[j].y,i.getGDF()["punto"].iloc[j].x)])
         su.updateIdOSM(l3)
-def probarClasificador(u=1):
-    from prediccion import ClasificadorPrediccion as cp
-    l=list()
-    clasi=cp.ClasificadorPrediccion()
-    for i in range(1,2):
-        l=probarTrayectoriaSemantica(u=u)
-        l4=list()
-        ltest=list()
-        ltesty=list()
-        for i in l:
-            l3=list()    
-            for j in range(len(i.getDF())):
-                idOsm=i.getListOSMId()[j]
-                json=pet.getNominatimforId(idOsm)
-                if json!=-1:
-#                    if json['features'][0]['properties']['type']=='yes':
-#                        l3.append(json['features'][0]['properties']['name'])
-#                    else:
-                    if json['features'][0]['properties']['type']!=l3[-1]:
-                        l3.append(json['features'][0]['properties']['type'])
-                    
-            if len(l3)>2:
-                l4.append(l3)
-        print(len(l4))
-        for i in range(len(l4)-1,-1,-1):
-            if i%5==0:
-                ltest.append(l4.pop(i))
-        clasi.fit(l4)
-    for i in ltest:
-        ltesty.append(i.pop(-1))
 
-    aciertos=0
-    fallos=0
-    for j,i in enumerate(ltest):
-        pre=clasi.predict(i)
-        
-        if pre!= None and ltesty[j] in pre:
-            aciertos=aciertos+1
-        else:
-            fallos=fallos+1
-    print("Aciertos:",aciertos,"Fallos:",fallos)
-    return aciertos,fallos
-def probarTrayectoriaSemantica(u=1):
-    l=ss.cargarTrayectoriasConceptuales(From="from parado", Where="where  trayectoria.id_usuario="+str(u)+" ")
-    ls=list()
-    for i in l:
-        ls.append(TrayectoriasSemantica(i))
-    return ls
 from prediccion import Probador as pro
-pro.Probador(usuario=153,clasificacion='category')
-pro.Probador(usuario=3,clasificacion='category')
-pro.Probador(usuario=4,clasificacion='category')
+from prediccion import Conversor as con
+conversor=con.Conversor()
+#153
+
+for i in [3,4,153]:
+    ltc=ss.cargarTrayectoriasConceptuales(From="from parado", Where="where  trayectoria.id_usuario="+str(i)+" ")
+    listasOSM=conversor.TStoIdOSM(conversor.TCtoTS(ltc))
+    p=pro.Probador(listasOSM)
+    for i in range(50):
+        p.validacionCruzada("category",division=5,minSupport=0.01*i)
+
+    print(p.getEstadisticos())
+    p.graficos()
+
 #aciertos=0
 #fallos=0
 #

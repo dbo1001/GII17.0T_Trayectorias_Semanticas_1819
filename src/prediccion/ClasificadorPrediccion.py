@@ -36,28 +36,24 @@ class nodo():
     def __str__(self):
         return self.__semantic
 class ClasificadorPrediccion(BaseEstimator,ClassifierMixin):  
-    """Un ejemplo de clasificador que utiliza un DecisionTree"""
     
-    def __init__(self,frequent=7,a=0.8):
+    def __init__(self,frequent=7,a=0.8,minSupport=0.05):
         """
         Constructor.
         
         Aunque no sea obligatorio, es recomendable que todos los parámetros 
         del constructor tengan valores por defecto.
-        
-        Como este clasificador solo copia a DecisionTree no tiene parámetros
+
         """
         self.root = nodo()
         self.__frequent=frequent
         self.__a=a
         self.__frecuencias=dict()
+        self.__minSupport=minSupport
 
 
     def fit(self, X, y=None):
-        """
-        En un clasificador "real" todo el trabajo debe de hacerse aquí
-        Consejo: Es una buena idea utilizar aserciones en lugar de try/except
-        """
+
         import pandas as pd
         from prefixspan import PrefixSpan
         
@@ -70,7 +66,7 @@ class ClasificadorPrediccion(BaseEstimator,ClassifierMixin):
             df.loc[i]=[j[1],j[0]/len(X),len(j[1])]
         df=df.sort_values("tam",ascending=True)
         df.drop("tam",axis=1,inplace=True)
-        df=df[df["support"] >= 0.05]
+        df=df[df["support"] >= self.__minSupport]
         df=df.reset_index(drop=True)
         
         

@@ -1,0 +1,18 @@
+﻿{% extends 'base.html' %}
+
+    {% block contenido %}
+        <div id="estructura-cargar">
+            <div id="margen-cargar"></div>
+            <div id="centro-cargar">
+                <div id="formulario-cargar">
+                    <h1>Hola</h1>
+                    {% from "macro-campos.html" import render_campo %}
+                    <form>
+                        {{ render_campo(form.ruta) }}
+                    </form>
+                    <button type="submit">Cargar</button>
+                </div>
+            </div>
+            <div id="margen-cargar"></div>
+        </div>
+    {% endblock %}

@@ -1,40 +1,66 @@
 # -*- coding: utf-8 -*-
 """
-Created on Mon May 20 17:13:07 2019
+Created on Wed May 22 01:56:32 2019
 
 @author: Hector
 """
+
 from prediccion import ClasificadorPrediccion as cp
 from SQL import SQLSelect as ss
 from modelo.TrayectoriaSemantica import TrayectoriasSemantica
+import pandas as pd
 import numpy as np
 from nominatim import peticion as pet
 class Probador():
-    def __init__(self,usuario=35,clasificacion='type'):
-        self.__usuario=usuario
-        self.__X=self.__cargarUsuario()
+    
+    '''
+    La clase probador nos sirve para probar distintas configuraciones para utilizar el clasificador de predicción.
+
+    Args:
+        X (list(list(int))): Es una lista que contiene rutas, estas rutas están formadas por una lista con las Id de OSM de cada punto.
+        
+    Attributes:
+        __X (list(list(int))): Guarda el argumento X
+        __tam (int): Almacena el número de trayectorias
+        __estadisticos (DataFrame): Almacena los resultados de cada validación cruzada junto a los parámetros de la validación
+        
+    '''
+    def __init__(self,X):
+        self.__X=X
         self.__tam=len(self.__X)
-        if clasificacion=='type':
-            self.__combertirATipos()
-        elif clasificacion=='category':
-            self.__combertirACategorias()
-        self.estadoDeDatos()
-        self.validacionCruzada()
+        self.__estadisticos=pd.DataFrame(columns=["Tipo","MinSupport","Division","FMeasure","Precision","Recall","Aciertos","Fallos"])
         pass
-    def validacionCruzada(self,division=5):
+    
+    def validacionCruzada(self,tipo,division=5,minSupport=0.05):
+        '''
+        Esta función realiza la validación cruzada sobre los datos de la clase (__X) y almacena los resultados en __estadisticos
+
+        Args:
+            tipo (str): La característica de los puntos que se quiere predecir
+            division (int): El numero de divisiones que utilizaremos en la validación cruzada
+            minSupport (float): El soporte mínimo que vamos a utilizar en el clasificador durante esta validación
+
+        Raises:
+
+        Returns:
+            bool: True Si finaliza correctamente
+        '''
         gruposX=list()
         resulY=list()
         clasificadores=list()
         aciertos=0
         fallos=0
+        X=self.__X.copy()
+        fTipo={"type":self.__combertirATipos,"category":self.__combertirACategorias}
+        X=fTipo[tipo](X)
         for i in range(division):
             gruposX.append(list())
             resulY.append(list())
-            clasificadores.append(cp.ClasificadorPrediccion())
-        while len(self.__X)>0:
+            clasificadores.append(cp.ClasificadorPrediccion(minSupport=minSupport))
+        while len(X)>0:
             for i in range(len(gruposX)):
-                if len(self.__X)>0:
-                    gruposX[i].append(self.__X.pop(np.random.randint(len(self.__X))))
+                if len(X)>0:
+                    gruposX[i].append(X.pop(np.random.randint(len(X))))
         rutaY=gruposX.copy()
         for c,i in enumerate(rutaY):
             for j in i:
@@ -43,15 +69,29 @@ class Probador():
             for j in range(division):
                 if i!=j:
                     clasificadores[i].fit(gruposX[j])
-            a,f=self.resultados(clasificadores[i],rutaY[i],resulY[i])
+            a,f=self.__resultados(clasificadores[i],rutaY[i],resulY[i])
             aciertos=aciertos+a
             fallos=fallos+f
         precision=aciertos/(aciertos+fallos)
         recall=(aciertos+fallos)/(self.__tam)
         fmeasure=(2*precision*recall)/(precision+recall)
-        print("F-Measure:",fmeasure,"Precision:",precision,"Recall:",recall)
-        pass
-    def resultados(self,clasi,ruta,resul):
+        self.__estadisticos.loc[len(self.__estadisticos)]=[tipo,minSupport,division,fmeasure,precision,recall,aciertos,fallos]
+
+    def __resultados(self,clasi,ruta,resul):
+        '''
+        Esta función sirve para contar el numero de aciertos y de fallos que se comenten al intentar predecir una lista de rutas.
+
+        Args:
+            clasi (ClasificadorPrediccion): Clasificador entrenado que utilizaremos para hacer las predicciones
+            ruta (list(list(str))): Lista con rutas para probar el clasificador
+            resul (list(str)): Lista de resultados que tenemos que obtener de las rutas
+
+        Raises:
+
+        Returns:
+            int: Número de aciertos
+            int: Número de fallos
+        '''
         aciertos=0
         fallos=0
         for j,i in enumerate(ruta):
@@ -60,24 +100,23 @@ class Probador():
                 aciertos=aciertos+1
             else:
                 fallos=fallos+1
-        print("Aciertos:",aciertos,"Fallos:",fallos)
+
         return aciertos,fallos
-    def resutadoUnico():
-        pass
-    def estadisticas():
-        pass
-    def __cargarUsuario(self):
-        #for d in range (1,8):
-        l=ss.cargarTrayectoriasConceptuales(From="from parado", Where="where  trayectoria.id_usuario="+str(self.__usuario)+" ")
-        #and EXTRACT(ISODOW FROM parado.instante_inicio) IN ("+str(d)+")
-        ls=list()
-        for i in l:
-            if len(TrayectoriasSemantica(i).getListOSMId())>2:
-                ls.append(TrayectoriasSemantica(i).getListOSMId())
-        return ls
-    def __combertirATipos(self):
+
+    def __combertirATipos(self,X):
+        '''
+        Función que se encarga de convertir las Id de OSM a el tipo que corresponde a esta Id.
+
+        Args:
+            X (list(list(int))): Lista con las rutas de Id de OSM que vamos a convertir
+
+        Raises:
+
+        Returns:
+            list(list(str)): La lista de ruta ya convertidas en rutas de tipos
+        '''
         l=list()
-        for i in self.__X:
+        for i in X:
             l.append(list())
             for j in i:
                 json=pet.getNominatimforId(j)
@@ -86,36 +125,43 @@ class Probador():
 #                        l[len(l)-1].append(json['features'][0]['properties']['name'])
 #                    else:
                     l[len(l)-1].append(json['features'][0]['properties']['type'])
-                
-        self.__X=l
-    
-    def estadoDeDatos(self):
-        variabilidad=dict()
-        contaPuntos=0
-        for i in self.__X:
-            for j in i:
-                contaPuntos=contaPuntos+1
-                if j in variabilidad:
-                    variabilidad[j]=variabilidad[j]+1
-                else:
-                    variabilidad[j]=1
-        print("---------------------------------")
-        l=list(variabilidad.values())
-        media=np.mean(l)
-        desviacion=0
-        for i in l:
-            desviacion=desviacion+(i-media)**2
-        desviacion=(desviacion/(len(l)-1))**(1/2)
-        varianza=desviacion**2
-        print("Clases: ",len(variabilidad),"Elementos: ",contaPuntos,'Desviacion: ',desviacion,'Varianza: ',varianza)
+        return l
         
-    def __combertirACategorias(self):
+    def __combertirACategorias(self,X):
+        '''
+        Función que se encarga de convertir las Id de OSM a la categoría que corresponde a esta Id.
+
+        Args:
+            X (list(list(int))): Lista con las rutas de Id de OSM que vamos a convertir
+
+        Raises:
+
+        Returns:
+            list(list(str)): La lista de ruta ya convertidas en rutas de categorías
+        '''
         l=list()
-        for i in self.__X:
+        for i in X:
             l.append(list())
             for j in i:
                 json=pet.getNominatimforId(j)
                 if json!=-1:
                     l[len(l)-1].append(json['features'][0]['properties']['category'])
                 
-        self.__X=l
+        return l
+    def getEstadisticos(self):
+        '''
+        Función get que devuelve el DataFrame con los resultados de las validaciones cruzadas.
+
+        Args:
+
+        Raises:
+
+        Returns:
+            DataDrame: Contiene los resultados de las validaciones cruzadas
+        '''
+        return self.__estadisticos
+    def graficos(self):
+        
+        
+        self.__estadisticos[["MinSupport","FMeasure"]].plot()
+        pass

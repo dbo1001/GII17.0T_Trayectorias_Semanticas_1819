@@ -8,7 +8,8 @@ from . import TrayectoriaConceptual
 from nominatim import peticion as pet
 import pandas as pd
 class TrayectoriasSemantica():
-    def __init__(self,trayectoria):
+    def __init__(self,trayectoria,tParadas=600):
+        self.__tParadas=tParadas
         if isinstance(trayectoria,TrayectoriaConceptual.TrayectoriaConceptual):
             self.__idTrayectoria=trayectoria.getIdTrayectoria()
             self.__idUsuario=trayectoria.getIdUsuario()
@@ -22,6 +23,7 @@ class TrayectoriasSemantica():
             self.__idTrayectoria=None
             self.__idUsuario=None
             self.__gdf=None
+        
     pass
     def __crearTrayectoriaSemantica(self,gdf):
         ultimo=-1
@@ -36,7 +38,7 @@ class TrayectoriasSemantica():
                     self.__gdf.instante_fin.iloc[len(self.__gdf)-1]=gdf["instante_fin"].iloc[i]
         self.__gdf['tiempo']=pd.to_timedelta(self.__gdf['instante_fin']).dt.total_seconds()
         self.__gdf['tiempo']=self.__gdf['tiempo']-pd.to_timedelta(self.__gdf['instante_inicio']).dt.total_seconds()
-        self.__gdf=self.__gdf[self.__gdf['tiempo']>600]
+        self.__gdf=self.__gdf[self.__gdf['tiempo']>self.__tParadas]
         self.__gdf=self.__gdf[['id_osm','instante_inicio','instante_fin']]
         pass
     def getDF(self):
