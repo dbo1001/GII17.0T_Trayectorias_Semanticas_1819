@@ -6,11 +6,10 @@ Created on Wed May 22 01:56:32 2019
 """
 
 from prediccion import ClasificadorPrediccion as cp
-from SQL import SQLSelect as ss
-from modelo.TrayectoriaSemantica import TrayectoriasSemantica
 import pandas as pd
 import numpy as np
-from nominatim import peticion as pet
+from prediccion import Conversor as con
+
 class Probador():
     
     '''
@@ -29,6 +28,7 @@ class Probador():
         self.__X=X
         self.__tam=len(self.__X)
         self.__estadisticos=pd.DataFrame(columns=["Tipo","MinSupport","Division","FMeasure","Precision","Recall","Aciertos","Fallos"])
+        self.__conversor=con.Conversor()
         pass
     
     def validacionCruzada(self,tipo,division=5,minSupport=0.05):
@@ -51,7 +51,7 @@ class Probador():
         aciertos=0
         fallos=0
         X=self.__X.copy()
-        fTipo={"type":self.__combertirATipos,"category":self.__combertirACategorias}
+        fTipo={"type":self.__conversor.combertirATipos,"category":self.__conversor.combertirACategorias}
         X=fTipo[tipo](X)
         for i in range(division):
             gruposX.append(list())
@@ -103,51 +103,7 @@ class Probador():
 
         return aciertos,fallos
 
-    def __combertirATipos(self,X):
-        '''
-        Función que se encarga de convertir las Id de OSM a el tipo que corresponde a esta Id.
 
-        Args:
-            X (list(list(int))): Lista con las rutas de Id de OSM que vamos a convertir
-
-        Raises:
-
-        Returns:
-            list(list(str)): La lista de ruta ya convertidas en rutas de tipos
-        '''
-        l=list()
-        for i in X:
-            l.append(list())
-            for j in i:
-                json=pet.getNominatimforId(j)
-                if json!=-1:
-#                    if json['features'][0]['properties']['type']=='yes':
-#                        l[len(l)-1].append(json['features'][0]['properties']['name'])
-#                    else:
-                    l[len(l)-1].append(json['features'][0]['properties']['type'])
-        return l
-        
-    def __combertirACategorias(self,X):
-        '''
-        Función que se encarga de convertir las Id de OSM a la categoría que corresponde a esta Id.
-
-        Args:
-            X (list(list(int))): Lista con las rutas de Id de OSM que vamos a convertir
-
-        Raises:
-
-        Returns:
-            list(list(str)): La lista de ruta ya convertidas en rutas de categorías
-        '''
-        l=list()
-        for i in X:
-            l.append(list())
-            for j in i:
-                json=pet.getNominatimforId(j)
-                if json!=-1:
-                    l[len(l)-1].append(json['features'][0]['properties']['category'])
-                
-        return l
     def getEstadisticos(self):
         '''
         Función get que devuelve el DataFrame con los resultados de las validaciones cruzadas.

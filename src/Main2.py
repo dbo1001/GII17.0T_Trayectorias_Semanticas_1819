@@ -67,18 +67,22 @@ def guardarIdOSM():
 
 from prediccion import Probador as pro
 from prediccion import Conversor as con
+from prediccion import ClusteringMatrices as CM
+##153
 conversor=con.Conversor()
-#153
+clus=CM.ClusteringMatrices()
+#for i in [3]:
+#    ltc=ss.cargarTrayectoriasConceptuales(From="from parado", Where="where  trayectoria.id_usuario="+str(i)+" ")
+#    listasOSM=conversor.TStoIdOSM(conversor.TCtoTS(ltc))
+#    p=pro.Probador(listasOSM)
+#    for i in range(50):
+#        p.validacionCruzada("category",division=5,minSupport=0.01*i)
+#
+#    print(p.getEstadisticos())
+#    p.graficos()
+print(clus.Clustering(agrupar=3,ID_Usuario_fin=20))
 
-for i in [3,4,153]:
-    ltc=ss.cargarTrayectoriasConceptuales(From="from parado", Where="where  trayectoria.id_usuario="+str(i)+" ")
-    listasOSM=conversor.TStoIdOSM(conversor.TCtoTS(ltc))
-    p=pro.Probador(listasOSM)
-    for i in range(50):
-        p.validacionCruzada("category",division=5,minSupport=0.01*i)
 
-    print(p.getEstadisticos())
-    p.graficos()
 
 #aciertos=0
 #fallos=0

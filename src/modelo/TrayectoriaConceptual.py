@@ -10,6 +10,20 @@ from nominatim import peticion as pet
 #from shapely.geometry import LineString
 import geopandas as gpd
 class TrayectoriaConceptual():
+    '''
+    Esta clase contiene y crea trayectorias conceptuales. Si recibe una trayectoria norma la convierte en conceptual.
+    Si recibe un GeoDataFrame extrae la información para completar los datos de la trayectoria conceptual.
+
+    Args:
+        trayectoria (Trayectoria): Es una lista que contiene rutas, estas rutas están formadas por una lista con las Id de OSM de cada punto.
+        trayectoria (GeoDataFrame): GeoDataFrame que contiene los datos necesarios para completar la clase TrayectoriaConceptual.
+        
+    Attributes:
+        gdf (GeoDataFrame): Guarda las paradas, tiempos de inicio, tiempos de fin y la id de la trayectoria conceptual.
+        __idTrayectoria (int): Id de la trayectoria.
+        __idUsuario (int): Id del usuario al que pertenece la trayectoria.
+        
+    '''
     def __init__(self,trayectoria):
         if isinstance(trayectoria,gpd.GeoDataFrame):
             self.gdf=trayectoria[['punto',"instante_inicio","instante_fin",'id_osm']]
@@ -21,86 +35,60 @@ class TrayectoriaConceptual():
             self.__idTrayectoria=trayectoria.getIdRuta()
             self.__idUsuario=trayectoria.getIdUsuario()
         pass
-#    def __CombertirAConceptual(self,trayectoria):
-#        gdf=trayectoria.GeoDataFrame
-#        parado=list()
-#        movimiento=list()
-#        if gdf.estado[0]==1:
-#            parado.append(0)
-#        else:
-#            movimiento.append(0)
-#        for i in range(1,len(gdf)):
-#            if gdf.estado[i]==1:
-#                if len(parado)==0:
-#                    self.crearSegmento(movimiento,gdf)
-#                    movimiento=list()
-#                parado.append(i)
-#            else:
-#                if len(movimiento)==0:
-#                    self.crearParada(parado,gdf)
-#                    parado=list()
-#                movimiento.append(i)  
-#        plt=self.gdf.plot(figsize=(20, 15), color='red', markersize=5)
-#        
-#        pass
+
     def __CombertirAConceptual(self,trayectoria):
+        '''
+        Función que convierte una trayectoria normal en una trayectoria conceptual
+
+        Args:
+            trayectoria (Trayectoria): Objeto de tipo Trayectoria que convertirá en TrayectoriaConceptual
+
+        Raises:
+
+        Returns:
+            
+        '''
         gdf=trayectoria.GeoDataFrame
         parado=list()
         for i in range(len(gdf)):
             if gdf.estado[i]==1:
                 parado.append(i)
             elif len(parado)>0:
-                self.crearParada(parado,gdf)
+                self.__crearParada(parado,gdf)
                 parado=list()
         if len(parado)>0:
-            self.crearParada(parado,gdf)
+            self.__crearParada(parado,gdf)
             parado=list()
 #        plt=gdf.plot(figsize=(20, 15), color='blue', markersize=5)        
 #        plt=self.gdf.plot(figsize=(20, 15),ax=plt, color='red', markersize=50)
         
         pass
-#    def pendiente(self,x1,x2,y1,y2):
-#        """
-#        1,4,2,1
-#        >>> t=TrayectoriaConceptual(" ")
-#        >>> t.pendiente(1,4,2,1)
-#        -0.3333333333333333
-#        
-#        """
-#        return (y2-y1)/(x2-x1)
-#    def angulo(self,m1,m2):
-#        """
-#        >>> t=TrayectoriaConceptual(" ")
-#        >>> t.angulo(2,-2/3)
-#        82.87498365109822
-#        """
-#        return math.degrees(math.atan((m2-m1)/(1+m2*m1)))
-#    def crearSegmento(self,lista,gdf):
-#        sumT=0
-#        if self.gdf.shape[0]==0:
-#            ini=lista[0]
-#            tIni=gdf.time[ini]
-#            pIni=gdf.punto[ini]
-#            lista.remove[0]
-#        else:
-#            ini=self.gdf.index[self.gdf.shape[0]-1]
-#            tIni=self.gdf.instante_fin[ini]
-#            pIni=self.gdf.geometry[ini]
-#        
-#        for i in lista:
-#            if sumT+gdf.intervalo[i]>60:
-#                self.gdf.loc[len(self.gdf)]=[LineString([pIni,gdf.punto[i]]),tIni,gdf.time[i]]
-#                sumT=0
-#                pIni=gdf.punto[i]
-#                tIni=gdf.time[i]
-#            else:
-#                sumT=sumT+gdf.intervalo[i]
-#        if len(gdf)>lista[len(lista)-1]:
-#            self.gdf.loc[len(self.gdf)]=[LineString([pIni,gdf.punto[lista[len(lista)-1]+1]]),tIni,gdf.time[lista[len(lista)-1]+1]]   
-#        pass
     def getIdUsuario(self):
+        '''
+        Función de tipo GET que retorna la Id del usuario al que pertenece la trayectoria
+
+        Args:
+            
+        Raises:
+
+        Returns:
+            int: Id del Usuario.
+            
+        '''
         return self.__idUsuario
-    def crearParada(self,lista,gdf):
+    def __crearParada(self,lista,gdf):
+        '''
+        Esta función agrupa las paradas y las añade al GeoDataFrame de la clase dejando como punto de la parada la media de todos los puntos que la forman.
+
+        Args:
+            lista (list): Lista con los índices de las paradas que hay que agrupar.
+            gdf (GeoDataFrame): GeoDataFrame de la trayectoria que se está tratando de convertir.
+            
+        Raises:
+
+        Returns:
+
+        '''
         x=0
         y=0
         for i in lista:
@@ -110,8 +98,30 @@ class TrayectoriaConceptual():
         self.gdf.loc[len(self.gdf)]=[ p,gdf.instante[lista[0]],gdf.instante[lista[len(lista)-1]],pet.getNominatimIdOSM(y/len(lista),x/len(lista))]
         pass
     def getIdTrayectoria(self):
+        '''
+        Función de tipo GET que retorna la Id de la trayectoria.
+
+        Args:
+            
+        Raises:
+
+        Returns:
+            int: Id de la trayectoria.
+            
+        '''
         return self.__idTrayectoria
     def getGDF(self):
+        '''
+        Función de tipo GET que retorna el GeoDataFrame que contiene las paradas de la trayectoria conceptual.
+
+        Args:
+            
+        Raises:
+
+        Returns:
+            int: GeoDataFrame que contiene las paradas de la trayectoria conceptual.
+            
+        '''
         return self.gdf
 if __name__ == "__main__":
     import doctest

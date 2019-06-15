@@ -1,5 +1,43 @@
 ﻿{% extends 'base.html' %}
 
     {% block contenido %}
-        <h2>PREDICCION</h2>
+        {% from "macro-campos.html" import render_campo %}
+        <script>
+            var usuarios= new set()
+            function anadirUsuario(){
+                var u=document.getElementById("user")
+                usuarios.add(u.nodeValue)
+                return None
+            }
+        
+        
+        
+        </script>
+        <section id="estructura-prediccion">
+            <section id="seleccion-prediccion">
+                <form  method = "POST" enctype = "multipart/form-data">
+                    {{ render_campo(form.usuario) }}
+                    <div id="bloqueLC">
+                        <button onclick="anadirUsuario()">Añadir</button>
+                    </div>
+                    {{ render_campo(form.dia) }}
+                    <div id="bloqueLC">
+                        <button onclick="anadirUsuario()">Cargar</button>
+                    </div>
+                    <div id="divTextArea">
+                        {{ render_campo(form.taFrom) }}
+                        {{ render_campo(form.taWhere) }}
+                        <div id="bloqueLC">
+                            <dt> {{ form.tOrder }} </dt>
+                        </div>
+                        <div id="bloqueLC">
+                            <button type="submit">Cargar</button>
+                        </div>
+                    </div>
+                </form>
+
+            </section>
+            <section id="configuracion-prediccion"></section>
+            <section id="graficos-prediccion"></section>
+        </section>
     {% endblock %}

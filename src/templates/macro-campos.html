@@ -1,4 +1,6 @@
 {% macro render_campo(campo) %}
-    <dt>{{ campo.label }}</dt>
-    <dd>{{ campo(**kwargs)|safe }}</dd>
+    <div id="bloqueLC">
+        <dt>{{ campo.label }}</dt>
+        <dd>{{ campo(**kwargs)|safe }}</dd>
+    </div>
 {% endmacro %}

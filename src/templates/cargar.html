@@ -5,12 +5,25 @@
             <div id="margen-cargar"></div>
             <div id="centro-cargar">
                 <div id="formulario-cargar">
-                    <h1>Hola</h1>
+                    <h1>Cargar archivos de datos</h1>
                     {% from "macro-campos.html" import render_campo %}
-                    <form>
-                        {{ render_campo(form.ruta) }}
+                    <form action = "/uploader" method = "POST" enctype = "multipart/form-data">
+                        <div id="bloqueLC">
+                            <dt>{{ form.ruta.label }}</dt>
+                            <dd>{{ form.ruta(webkitdirectory="webkitdirectory", directory="directory", multiple="") }}</dd>
+                        </div>
+                        {{ render_campo(form.longitud) }}
+                        {{ render_campo(form.latitud) }}
+                        {{ render_campo(form.columnaTiempo1) }}
+                        {{ render_campo(form.formatoTiempo1) }}
+                        {{ render_campo(form.columnaTiempo2) }}
+                        {{ render_campo(form.formatoTiempo2) }}
+                        {{ render_campo(form.lineainicio) }}
+                        {{ render_campo(form.extension) }}
+                        <div id="bloqueLC">
+                            <button type="submit">Cargar</button>
+                        </div>
                     </form>
-                    <button type="submit">Cargar</button>
                 </div>
             </div>
             <div id="margen-cargar"></div>

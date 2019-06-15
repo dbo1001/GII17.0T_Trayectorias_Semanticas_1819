@@ -7,31 +7,135 @@ Created on Thu May  2 14:43:46 2019
 from sklearn.base import BaseEstimator, ClassifierMixin
 import pandas as pd
 class nodo():
+    '''
+    Esta clase esta diseñada para ser los nodos del árbol de clasificación “ClasificadorPrediccion”.
+
+    Args:
+        se (str): Semántica del nodo.
+        su (float): Soporte del nodo.
+        
+    Attributes:
+        __semantic (str): Almacena la semántica del nodo.
+        __support (float): Almacena el soporte del nodo.
+        __children (dict): Almacena los nodos hijo de este nodo.
+        
+    '''
     def __init__(self,se=str(),su=1.0):
         self.__semantic=se
         self.__support=su
         self.__children=dict()
     def setSemantic(self,s:str()):
+        '''
+        Función de tipo SET que modifica la semántica de un nodo.
+
+        Args:
+            s (str): Nuevo valor para la semántica.
+            
+        Raises:
+
+        Returns:
+            
+        '''
         self.__semantic=s
     def setSupport(self,s:float()):
+        '''
+        Función de tipo SET que modifica el soporte de un nodo.
+
+        Args:
+            s (float): Nuevo valor para el soporte.
+            
+        Raises:
+
+        Returns:
+            
+        '''
         self.__support=s
     def addChild(self,k,v):
+        '''
+        Función que añade un nuevo hijo al nodo.
+
+        Args:
+            k (str): Clave del nodo “semantic”.
+            v (nodo): El nodo que se va a añadir a los hijos del nodo actual.
+            
+        Raises:
+
+        Returns:
+            
+        '''
         self.__children[k]=v
     def getChildren(self,k):
+        '''
+        Función de tipo GET que devuelve el hijo del nodo actual al que corresponde la clave recibida.
+
+        Args:
+            k (str): Clave del hijo del nodo actual.
+            
+        Raises:
+
+        Returns:
+            node: Retorna el hijo si existe y None si no existe.
+            
+        '''
         if k in self.__children:
             return self.__children[k]
         else:
             return None
     def existChildren(self,k):
+        '''
+        Función que devuelve si existe en este nodo un nodo hijo con la clave recibida.
+
+        Args:
+            k (str): Clave del nodo que estamos buscando.
+            
+        Raises:
+
+        Returns:
+            boolean: True si existe, False si no existe.
+            
+        '''
         if k in self.__children:
             return True
         else:
             return False
     def getSupport(self):
+        '''
+        Función de tipo GET que devuelve el soporte del nodo.
+        
+        Args:
+            
+        Raises:
+
+        Returns:
+            float: Retorna el soporte del nodo.
+            
+        '''
         return self.__support
     def getChildrenList(self):
+        '''
+        Función de tipo GET que devuelve la lista de hijos del nodo.
+        
+        Args:
+            
+        Raises:
+
+        Returns:
+            list: Lista con todos los nodos hijos de este nodo.
+            
+        '''
         return list(self.__children.values())
     def getSemantic(self):
+        '''
+        Función de tipo GET que devuelve el valor de la semántica del nodo.
+        
+        Args:
+            
+        Raises:
+
+        Returns:
+            str: Retorna el valor de la semántica de este nodo.
+            
+        '''
         return self.__semantic
     def __str__(self):
         return self.__semantic
