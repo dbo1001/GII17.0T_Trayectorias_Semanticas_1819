@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+    {% block contenido %}
+    <meta http-equiv="refresh" content={{ t }} >
+        <div class="row justify-content-center py-4">
+            <div class="col-4 rounded border border-secondary py-4 px-4 mx-4">
+                    <div id="centro-espera">
+                        {{ msg | safe }}    
+                        
+                    </div>
+                </div>    
+        </div>
+    {% endblock %}

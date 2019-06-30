@@ -1,16 +1,69 @@
 ﻿{% extends 'base.html' %}
 
     {% block contenido %}
-        <div id="estructura-cargar">
-            <div id="margen-cargar"></div>
-            <div id="centro-cargar">
-                <div id="formulario-cargar">
-                    <h1>Cargar archivos de datos</h1>
+        <script type="text/javascript">
+            
+            function validar(){
+                var fin=document.getElementById("fin");
+                var customFile=document.getElementById("customFile").value;
+                var longitud=document.getElementById("longitud").value;
+                var latitud=document.getElementById("latitud").value;
+                var columnaTiempo1=document.getElementById("columnaTiempo1").value;
+                var columnaTiempo2=document.getElementById("columnaTiempo2").value;
+                var formatoTiempo1=document.getElementById("formatoTiempo1").value;
+                var formatoTiempo2=document.getElementById("formatoTiempo2").value;
+                var lineainicio=document.getElementById("lineainicio").value;
+                var extension=document.getElementById("extension").value;
+                if(customFile==""){
+                    fin.innerHTML="<div class=\"alert alert-danger\" role=\"alert\">Se debe seleccionar un directorio</div>";
+                }else{
+                    if(longitud=="" || !validarNumero(longitud)){
+                        fin.innerHTML="<div class=\"alert alert-danger\" role=\"alert\">Se debe introducir una columna válida parala longitud</div>";
+                    }else{
+                        if(latitud=="" || !validarNumero(latitud)){
+                            fin.innerHTML="<div class=\"alert alert-danger\" role=\"alert\">Se debe introducir una columna válida para la latitud</div>";
+                        }else{
+                            if(columnaTiempo1=="" || !validarNumero(columnaTiempo1)){
+                                fin.innerHTML="<div class=\"alert alert-danger\" role=\"alert\">Se debe introducir una al menos una columna válida para el tiempo</div>";
+                            }else{
+                                if(formatoTiempo1==""){
+                                    fin.innerHTML="<div class=\"alert alert-danger\" role=\"alert\">Se debe introducir al menos un formato para la primera columna de tiempo</div>";
+                                }else{
+                                    if(!validarNumero(columnaTiempo2)){
+                                        fin.innerHTML="<div class=\"alert alert-danger\" role=\"alert\">La columna de tiempo 2 debe ser de tipo numérico</div>";
+                                    }else{
+                                        if(!((columnaTiempo2=="" && formatoTiempo2=="") || (columnaTiempo2!="" && formatoTiempo2!="")) ){
+                                            fin.innerHTML="<div class=\"alert alert-danger\" role=\"alert\">Si se rellena la columna de tiempo 2 también se debe rellenar el formato de tiempo 2 y viceversa</div>";
+                                        }else{
+                                            if(lineainicio=="" || !validarNumero(lineainicio)){
+                                                fin.innerHTML="<div class=\"alert alert-danger\" role=\"alert\">Se debe introducir una línea de inicio valida para leer el documento</div>";
+                                            }else{
+                                                if(extension==""){
+                                                    fin.innerHTML="<div class=\"alert alert-danger\" role=\"alert\">Se debe introducir una extensión para identificar los archivos que se quieren leer</div>";
+                                                }else{
+                                                    document.getElementById("form").submit();
+                                                    return true;
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                        
+                            }
+                        }
+                    }
+                }
+            }
+            
+        </script>
+        <div class="row justify-content-center py-4" id="estructura-cargar">
+                <div class="col-4 rounded border border-secondary py-4 px-4 mx-4" id="formulario-cargar">
+                    <h3>Cargar archivos de datos</h3>
                     {% from "macro-campos.html" import render_campo %}
-                    <form action = "/uploader" method = "POST" enctype = "multipart/form-data">
-                        <div id="bloqueLC">
-                            <dt>{{ form.ruta.label }}</dt>
-                            <dd>{{ form.ruta(webkitdirectory="webkitdirectory", directory="directory", multiple="") }}</dd>
+                    <form id="form" method = "POST" action="" enctype = "multipart/form-data">
+                        <div class="custom-file">
+                            {{ form.ruta(webkitdirectory="webkitdirectory", directory="directory", multiple="",class_="custom-file-input", id="customFile", lang="es") }}
+                            {{ form.ruta.label(class_="custom-file-label" ,for="customFile") }}
                         </div>
                         {{ render_campo(form.longitud) }}
                         {{ render_campo(form.latitud) }}
@@ -20,12 +73,13 @@
                         {{ render_campo(form.formatoTiempo2) }}
                         {{ render_campo(form.lineainicio) }}
                         {{ render_campo(form.extension) }}
-                        <div id="bloqueLC">
-                            <button type="submit">Cargar</button>
+                        <p>Los campos con “*” son obligatorios</p>
+                        <div id="fin"></div>
+                        <div class="form-group row">
+                            <button id="cargar" class="btn btn-dark my-4 mx-4" type="button" onclick="validar();">Cargar</button>
                         </div>
                     </form>
                 </div>
-            </div>
-            <div id="margen-cargar"></div>
+
         </div>
     {% endblock %}

@@ -2,42 +2,92 @@
 
     {% block contenido %}
         {% from "macro-campos.html" import render_campo %}
+        {% from "macro-campos-chek.html" import render_campo_chek %}
         <script>
-            var usuarios= new set()
-            function anadirUsuario(){
-                var u=document.getElementById("user")
-                usuarios.add(u.nodeValue)
-                return None
+            
+            function validar(){
+
+                var fin = document.getElementById("fin")
+                var user=document.getElementById("user").value
+                if( !validarNumero(user)){
+                    fin.innerHTML="<div class=\"alert alert-danger\" role=\"alert\">No es un usuario valido</div>";
+                }else{
+                    document.getElementById("form").submit();  
+                }
+            }
+            function reiniciar(){
+                window.location.replace("{{ url_for('reiniciar') }}");
+            }
+            function predecir(){
+                window.location.replace("{{ url_for('clasificar') }}");
             }
         
         
-        
         </script>
-        <section id="estructura-prediccion">
-            <section id="seleccion-prediccion">
-                <form  method = "POST" enctype = "multipart/form-data">
+        <section class="row justify-content-center py-4" id="estructura-cargar">
+            <section class="col-3 rounded border border-secondary py-4 px-4 mx-4" id="formulario-cargar">
+                <p class="h4">Cargar Datos</p>
+                <form  id="form" method = "POST" enctype = "multipart/form-data">
+                    
                     {{ render_campo(form.usuario) }}
-                    <div id="bloqueLC">
-                        <button onclick="anadirUsuario()">Añadir</button>
+                    
+                    <p class="col-form-label">Seleccione los días de la semana, si no se marca ninguno se utilizarán todos</p>
+
+                    <div class="row justify-content-center">
+                    {{ render_campo_chek(form.lunes) }}
+                    {{ render_campo_chek(form.martes) }}
+                    {{ render_campo_chek(form.miercoles) }}
+                    {{ render_campo_chek(form.jueves) }}
+                    {{ render_campo_chek(form.viernes) }}
+                    {{ render_campo_chek(form.sabado) }}
+                    {{ render_campo_chek(form.domingo) }}
                     </div>
-                    {{ render_campo(form.dia) }}
-                    <div id="bloqueLC">
-                        <button onclick="anadirUsuario()">Cargar</button>
-                    </div>
-                    <div id="divTextArea">
-                        {{ render_campo(form.taFrom) }}
-                        {{ render_campo(form.taWhere) }}
-                        <div id="bloqueLC">
-                            <dt> {{ form.tOrder }} </dt>
+                        <div class="form-group ">
+                            <div class="row">
+                                {{ form.taFrom.label(id="fromL", class_="col-12 col-form-label") }}
+                            </div>
+                            <div class="row">
+                                {{ form.taFrom(class_="form-control col-12")|safe }}
+                            </div>        
                         </div>
-                        <div id="bloqueLC">
-                            <button type="submit">Cargar</button>
+                        <div class="form-group ">
+                            <div class="row">
+                                {{ form.taWhere.label(id="whereL",class_="col-12 col-form-label") }}
+                            </div>
+                            <div class="row">
+                                {{ form.taWhere(class_="form-control col-12")|safe }}
+                            </div>        
                         </div>
-                    </div>
+                        <div class="form-group ">
+                            <div class="row">
+                                <p class="col-form-label col-12 mx-2"> {{ form.tOrder }} </p>
+                            </div>
+                        </div>
+                        <div id="fin"></div>
+                        {{ msg | safe }} 
+                        <div class="form-group ">
+                                <button id="cargar" class="btn btn-dark my-4 mx-4" type="button" onclick="validar();">Cargar</button>
+                        </div>
+                    
                 </form>
 
             </section>
-            <section id="configuracion-prediccion"></section>
-            <section id="graficos-prediccion"></section>
+            <section class="col-3 rounded border border-secondary py-4 px-4 mx-4">
+                    <p class="h4">Información de entrenamiento</p>
+                    <p class="col-form-label">Numero de trayectorias {{ msgNum }}</p>
+                    <p class="col-form-label">Aciertos {{ msgA }}</p>
+                    <p class="col-form-label">Fallos {{ msgF }}</p>
+                    <p class="col-form-label">FMeasure {{ msgFM }}</p>
+                    <p class="col-form-label">Precisión {{ msgP }}</p>
+                    <p class="col-form-label">Recall {{ msgR }}</p>
+
+                    {{ msg2 | safe }}
+                    <button id="predecir" class="btn btn-dark my-4 mx-4" type="button" onclick="predecir();" {{btPre}}>Predecir</button>
+                    <button id="reiniciar" class="btn btn-dark my-4 mx-4" type="button" onclick="reiniciar();" {{btRe}}>Reiniciar</button>
+            </section>
+            <section class="col-3 rounded border border-secondary py-4 px-4 mx-4">
+                <p class="h4">Resultado de la predicción</p>
+                {{ msg3 | safe }}
+            </section>
         </section>
     {% endblock %}

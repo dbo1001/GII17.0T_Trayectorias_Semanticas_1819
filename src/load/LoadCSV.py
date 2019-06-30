@@ -59,12 +59,8 @@ class LoadCSV():
                 if fname[len(fname)-(len(self.CDL.extension)):len(fname)]==self.CDL.extension:
                     complet=dirName+'/'+fname
                     aux=""
-                    for j in complet:
-                        if j=='\\':
-                            aux=aux+"/"
-                        else:
-                            aux=aux+j
-                    yield aux
+                    
+                    yield complet
     def crearTrayectoria(self,df):
         
         return self.__dividirTrayectoria(df)

@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+    {% block contenido %}
+    <script language="javascript">
+            function csv(){
+                
+            }
+    </script>    
+    <div class="row justify-content-center py-4">
+            <div class="col-5 rounded border border-secondary py-4 px-4 mx-4">
+                <form id="form" method = "POST" action="" enctype = "multipart/form-data">
+                    <div class="form-group row">
+                        <button id="csv" class="btn btn-dark my-4 mx-4" type="button" href="{{ url_for('accionesExportarCSV') }}">Exportar</button>
+                        <button id="cargar" class="btn btn-dark my-4 mx-4" type="button" onclick="">Visualizar Mapa</button>
+                        <button id="cargar" class="btn btn-dark my-4 mx-4" type="button" onclick="">Ver Tabla</button>
+                    </div>
+                </form>
+            </div>
+    </div>
+    <h2>Exportar</h2>
+    <img src="static/img/ERBD.PNG" alt="Modelo ER">
+
+    {% endblock %}

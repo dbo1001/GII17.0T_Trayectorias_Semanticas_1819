@@ -1,0 +1,6 @@
+{% macro render_campo_chek(campo) %}
+    <div class="form-check form-chek-inline col-1"> 
+        {{ campo(class_="form-check-input",value="1")|safe }}
+        {{ campo.label(class_="form-check-label") }}
+    </div>
+{% endmacro %}

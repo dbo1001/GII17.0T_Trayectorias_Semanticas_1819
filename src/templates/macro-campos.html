@@ -1,6 +1,9 @@
 {% macro render_campo(campo) %}
-    <div id="bloqueLC">
-        <dt>{{ campo.label }}</dt>
-        <dd>{{ campo(**kwargs)|safe }}</dd>
+    <div class="form-group row">
+        {{ campo.label(class_="col-8 col-form-label") }}
+        <div class="col-4">
+        {{ campo(class_="form-control")|safe }}
+        </div>
+        
     </div>
 {% endmacro %}

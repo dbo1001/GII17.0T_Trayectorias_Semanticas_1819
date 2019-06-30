@@ -1,0 +1,37 @@
+﻿{% extends 'base.html' %}
+    {% block contenido %}
+    <script language="javascript">
+            function validar(){
+                document.getElementById("form").submit();
+            }
+    </script>    
+    <div class="row justify-content-center py-4">
+            <div class="col-5 rounded border border-secondary py-4 px-4 mx-4">
+                <form id="form" method = "POST" action="" enctype = "multipart/form-data">
+                    <div class="form-group ">
+                        <div class="row">
+                            {{ form.select.label(class_="col-12 col-form-label") }}
+                        </div>
+                        <div class="row">
+                            {{ form.select(class_="form-control col-12")|safe }}
+                        </div>        
+                    </div>
+                    {{ msg | safe }}
+                    <div class="form-group row">
+                        <button id="cargar" class="btn btn-dark my-4 mx-4" type="button" onclick="validar();">Exportar</button>
+
+                    </div>
+                </form>
+            </div>
+            <div class="col-5 rounded border border-secondary py-4 px-4 mx-4">
+                <img src="static/img/ERBD.PNG" alt="Modelo ER">
+            </div>
+    </div>
+    <div class="row justify-content-center py-4">
+        {% block contenido_exportar %}
+        {% endblock %}
+
+    </div>
+
+
+    {% endblock %}

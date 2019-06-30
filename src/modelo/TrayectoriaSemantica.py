@@ -45,4 +45,7 @@ class TrayectoriasSemantica():
         return self.__gdf
     def getListOSMId(self):
         return self.__gdf.id_osm.tolist()
-        
+    def getUsuarioId(self):
+        return self.__idUsuario
+    def getTrayectoriaId(self):
+        return self.__idTrayectoria

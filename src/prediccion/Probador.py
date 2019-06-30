@@ -76,6 +76,7 @@ class Probador():
         recall=(aciertos+fallos)/(self.__tam)
         fmeasure=(2*precision*recall)/(precision+recall)
         self.__estadisticos.loc[len(self.__estadisticos)]=[tipo,minSupport,division,fmeasure,precision,recall,aciertos,fallos]
+        return fmeasure,precision,recall,aciertos,fallos
 
     def __resultados(self,clasi,ruta,resul):
         '''
