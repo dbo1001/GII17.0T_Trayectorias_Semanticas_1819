@@ -60,28 +60,20 @@ def cargarRutas(From,Where):
         listasOSM=conversor.TStoIdOSM(lts)
         lx=listasOSM.copy()
         datos.cargados=lts
-        print("----------->",datos.clasificador)
         
         if datos.clasificador is None:
             if len(listasOSM)<5:
                 datos.cargados=-2
             else:
                 p=pro.Probador(listasOSM)
-                print(">> 1 <<")
                 fmeasure,precision,recall,aciertos,fallos=p.validacionCruzada("category",division=5,minSupport=0.01)
-                print(">> 2 <<")
                 datos.fmeasure=round(fmeasure,2)
-                print(">> 3 <<")
                 datos.precision=round(precision,2)
                 datos.recall=round(recall,2)
                 datos.aciertos=aciertos
-                print(">> 4 <<")
                 datos.fallos=fallos
-
                 X=conversor.combertirACategorias(listasOSM)
-                print(">> 5 <<")
                 datos.clasificador=cp.ClasificadorPrediccion().fit(X)
-                print(">> 6 <<")
         else:
             datos.X=conversor.combertirACategorias(lx)
 
