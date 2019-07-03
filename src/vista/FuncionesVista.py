@@ -8,7 +8,6 @@ from modelo.TrayectoriaConceptual import TrayectoriaConceptual
 from SQL import SQLSelect as ss
 from prediccion import Probador as pro
 from prediccion import Conversor as con
-from prediccion import ClusteringMatrices as CM
 from vista import DatosPrediccion
 from prediccion import ClasificadorPrediccion as cp
 
